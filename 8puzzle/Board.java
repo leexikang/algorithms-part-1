@@ -1,9 +1,9 @@
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
-
 public class Board {
- 
+
     private final int[][] tiles;
 
     // create a board from an n-by-n array of tiles,
@@ -14,11 +14,11 @@ public class Board {
 
     // string representation of this board
     public String toString() {
-        String toString  = "";
+        String toString = "";
         toString += tiles.length + "\n";
 
-        for(int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++){
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < tiles[i].length; j++) {
                 toString += " " + tiles[i][j];
             }
             toString += "\n";
@@ -35,9 +35,9 @@ public class Board {
     public int hamming() {
         int hamming = 0;
 
-        for(int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++){
-                if (tiles[i][j] != (i * tiles[i].length) +  j + 1 && tiles[i][j]   != 0){
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < tiles[i].length; j++) {
+                if (tiles[i][j] != (i * tiles[i].length) + j + 1 && tiles[i][j] != 0) {
                     hamming++;
                 }
             }
@@ -50,15 +50,15 @@ public class Board {
     public int manhattan() {
         int manhattan = 0;
 
-        for(int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++){
-                if (tiles[i][j] == 0){
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < tiles[i].length; j++) {
+                if (tiles[i][j] == 0) {
                     continue;
                 }
 
-                int currnetIndex =( i * tiles[i].length) +  j + 1 ;
-                if (tiles[i][j] != currnetIndex){
-                    int missplaced = Math.abs( currnetIndex - tiles[i][j]);
+                int currnetIndex = (i * tiles[i].length) + j + 1;
+                if (tiles[i][j] != currnetIndex) {
+                    int missplaced = Math.abs(currnetIndex - tiles[i][j]);
                     manhattan += missplaced / tiles.length + missplaced % tiles.length;
                 }
             }
@@ -69,10 +69,15 @@ public class Board {
 
     // is this board the goal board?
     public boolean isGoal() {
-        for(int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length - 1; j++){
-                int currnetIndex =( i * tiles[i].length) +  j + 1 ;
-                if (tiles[i][j] != currnetIndex){
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < tiles.length; j++) {
+
+                if (i == tiles.length - 1 && j == tiles.length - 1) {
+                    continue;
+                }
+
+                int currnetIndex = (i * tiles[i].length) + j + 1;
+                if (tiles[i][j] != currnetIndex) {
                     return false;
                 }
             }
@@ -83,7 +88,8 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
-        return toString().equals( y.toString());
+        Board that = (Board) y;
+        return Arrays.deepEquals(this.tiles, that.tiles);
     }
 
     // all neighboring boards
@@ -93,38 +99,38 @@ public class Board {
 
         for (int i = 0; i < tiles.length; i++) {
             for (int j = 0; j < tiles[i].length; j++) {
-                if (tiles[i][j] == 0){
+                if (tiles[i][j] == 0) {
                     y = i;
                     x = j;
                 }
             }
         }
 
-       ArrayList<Board> neighbors = new ArrayList<Board>();
+        ArrayList<Board> neighbors = new ArrayList<Board>();
 
-       if(x + 1 < tiles.length ) {
-           neighbors.add(neighborBoard(x, y, x+1, y));
-       }
+        if (x + 1 < tiles.length) {
+            neighbors.add(neighborBoard(x, y, x + 1, y));
+        }
 
-       if(x - 1  >= 0 ) {
-           neighbors.add(neighborBoard(x, y, x -1 , y));
-       }
+        if (x - 1 >= 0) {
+            neighbors.add(neighborBoard(x, y, x - 1, y));
+        }
 
-      if(y + 1  < tiles.length ) {
-           neighbors.add(neighborBoard(x, y, x , y+1));
-       }
+        if (y + 1 < tiles.length) {
+            neighbors.add(neighborBoard(x, y, x, y + 1));
+        }
 
-       if (y - 1  >= 0) {
-           neighbors.add(neighborBoard(x, y, x, y - 1));
-       }
+        if (y - 1 >= 0) {
+            neighbors.add(neighborBoard(x, y, x, y - 1));
+        }
 
-       return new NeighborIerable(neighbors);
+        return new NeighborIerable(neighbors);
     }
 
     private Board neighborBoard(int blankX, int blankY, int x, int y) {
-        int[][] neighborsTiles  = copyTiles();
+        int[][] neighborsTiles = copyTiles();
         neighborsTiles[blankY][blankX] = tiles[y][x];
-        neighborsTiles[y][x] = 0;
+        neighborsTiles[y][x] = this.tiles[blankY][blankX];
         return new Board(neighborsTiles);
     }
 
@@ -140,15 +146,29 @@ public class Board {
     }
 
     // a board that is obtained by exchanging any pair of tiles
-    // public Board twin() {
-    // }
+    public Board twin() {
+        for (int i = 0; i < tiles.length; i++) {
+            for (int j = 0; j < tiles.length; j++) {
+                if (this.tiles[i][j] != 0) {
+                    if (j + 1 < tiles.length) {
+                        if (tiles[i][j + 1] != 0) {
+                            return neighborBoard(j, i, j + 1, i);
+                        }
+                    } else {
+                        if (tiles[i + 1][0] != 0) {
+                            return neighborBoard(j, i, 0, i + 1);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
 
-    
-
-    public class NeighborIerable implements Iterable<Board>{
+    private class NeighborIerable implements Iterable<Board> {
 
         ArrayList<Board> neighbors;
-        
+
         public NeighborIerable(ArrayList<Board> neighbors) {
             this.neighbors = neighbors;
         }
@@ -157,13 +177,13 @@ public class Board {
         public Iterator<Board> iterator() {
             return new NeighborIterator();
         }
-        
-        public class NeighborIterator implements Iterator<Board>{
+
+        public class NeighborIterator implements Iterator<Board> {
             int index = 0;
 
             @Override
             public boolean hasNext() {
-                if(index < neighbors.size()){
+                if (index < neighbors.size()) {
                     return true;
                 }
                 return false;
@@ -171,8 +191,8 @@ public class Board {
 
             @Override
             public Board next() {
-                if(index < neighbors.size()){
-                   Board board = neighbors.get(index);
+                if (index < neighbors.size()) {
+                    Board board = neighbors.get(index);
                     index++;
                     return board;
                 }
@@ -185,14 +205,21 @@ public class Board {
     // unit testing (not graded)
     public static void main(String[] args) {
         int[][] tiles = {
-            {8,1,3},
-            {0,4,2},
-            {7,6,5},
+                { 0, 1 },
+                { 2, 3 },
         };
 
+        // int[][] tiles2 = {
+        // { 1, 2, 3, 4 },
+        // { 5, 6, 7, 8 },
+        // { 9, 10, 11, 12 },
+        // { 13, 14, 15, 0 },
+        // };
+
         Board board = new Board(tiles);
-        for (Board bo : board.neighbors()) {
-            System.out.println(bo.toString());
-        }
+        System.out.println(board.twin().toString());
+        // for (Board bo : board.neighbors()) {
+        // System.out.println(bo.toString());
+        // }
     }
 }
