@@ -1,0 +1,6 @@
+{
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "/Users/admin/Desktop/algorithm/algs4.jar"
+    ]
+}
