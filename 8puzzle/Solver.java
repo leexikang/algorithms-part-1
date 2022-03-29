@@ -8,6 +8,9 @@ public class Solver {
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
+        if (initial == null) {
+            throw new IllegalArgumentException();
+        }
 
         MinPQ<Node> minPQ = new MinPQ<Node>();
         MinPQ<Node> twinPQ = new MinPQ<Node>();
@@ -28,7 +31,7 @@ public class Solver {
                     continue;
                 }
 
-                minPQ.insert(new Node(currentNode, b, moves + 1));
+                minPQ.insert(new Node(currentNode, b, currentNode.moves + 1));
             }
 
             Node twinNode = twinPQ.delMin();
@@ -43,10 +46,9 @@ public class Solver {
                     continue;
                 }
 
-                twinPQ.insert(new Node(twinNode, b, moves + 1));
+                twinPQ.insert(new Node(twinNode, b, twinNode.moves + 1));
             }
 
-            moves++;
         }
     }
 
@@ -57,20 +59,11 @@ public class Solver {
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        if (!this.solvable) {
+        if(goalNode == null){
             return -1;
         }
 
-        int moves = 0;
-        Node node = goalNode;
-        while (true) {
-            if (node.previous == null) {
-                return moves;
-            }
-
-            node = node.previous;
-            moves++;
-        }
+        return goalNode.moves;
     }
 
     private class Node implements Comparable<Node> {
@@ -78,23 +71,25 @@ public class Solver {
         final Node previous;
         final Board current;
         private final int moves;
+        private final int manhattan;
 
         public Node(Node previous, Board current, int moves) {
             this.previous = previous;
             this.current = current;
             this.moves = moves;
+            manhattan = this.current.manhattan();
         }
 
         public int cost() {
-            return this.moves + this.current.hamming();
+            return this.moves + this.manhattan;
         }
 
         @Override
         public int compareTo(Node that) {
             if (this.cost() != that.cost())
                 return this.cost() - that.cost();
-            if (this.current.manhattan() != that.current.manhattan())
-                return this.current.manhattan() - that.current.manhattan();
+            if (this.manhattan != that.manhattan)
+                return this.manhattan - that.manhattan;
 
             return this.moves - that.moves;
         }
@@ -102,24 +97,27 @@ public class Solver {
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
+
+        if (!solvable) {
+            return null;
+        }
+
         ArrayList<Board> list = new ArrayList<Board>();
         Node node = goalNode;
         while (true) {
+            
+            list.add(node.current);
             if (node.previous == null) {
                 break;
             }
-            list.add(node.current);
             node = node.previous;
         }
+
         ArrayList<Board> revArrayList = new ArrayList<Board>();
         for (int i = list.size() - 1; i >= 0; i--) {
 
             revArrayList.add(list.get(i));
         }
         return revArrayList;
-    }
-
-    // test client (see below)
-    public static void main(String[] args) {
     }
 }

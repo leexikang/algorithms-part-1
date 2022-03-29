@@ -52,9 +52,6 @@ public class PuzzleChecker {
             StdOut.println(filename + ": " + solver.moves());
             // StdOut.println(initial.toString());
             // StdOut.println("-------------------------");
-            // for (Board board : solver.solution()) {
-            // StdOut.println(board.toString());
-            // }
         }
     }
 }

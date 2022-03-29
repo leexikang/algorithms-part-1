@@ -1,6 +1,5 @@
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 
 public class Board {
 
@@ -9,26 +8,27 @@ public class Board {
     // create a board from an n-by-n array of tiles,
     // where tiles[row][col] = tile at (row, col)
     public Board(int[][] tiles) {
-        this.tiles = tiles;
+        this.tiles = copyTiles(tiles);
     }
+    
 
     // string representation of this board
     public String toString() {
-        String toString = "";
-        toString += tiles.length + "\n";
-
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++) {
-                toString += " " + tiles[i][j];
+        int n = dimension();
+        StringBuilder s = new StringBuilder();
+            s.append(n + "\n");
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    s.append(String.format("%2d ", tiles[i][j]));
+                }
+                s.append("\n");
             }
-            toString += "\n";
-        }
-        return toString;
+            return s.toString();
     }
 
     // board dimension n
     public int dimension() {
-        return tiles.length + 1;
+        return tiles.length;
     }
 
     // number of tiles out of place
@@ -58,12 +58,16 @@ public class Board {
 
                 int currnetIndex = (i * tiles[i].length) + j + 1;
                 if (tiles[i][j] != currnetIndex) {
-                    int missplaced = Math.abs(currnetIndex - tiles[i][j]);
-                    manhattan += missplaced / tiles.length + missplaced % tiles.length;
+                    int y = tiles[i][j] / tiles.length;
+                    int x = tiles[i][j] % tiles.length;
+                    if (x == 0) {
+                        x = tiles.length;
+                        y = y - 1;
+                    }
+                    manhattan += Math.abs(i - y) + Math.abs(j+1 - x);
                 }
             }
         }
-
         return manhattan;
     }
 
@@ -88,8 +92,16 @@ public class Board {
 
     // does this board equal y?
     public boolean equals(Object y) {
-        Board that = (Board) y;
-        return Arrays.deepEquals(this.tiles, that.tiles);
+        if (y == null) {
+            return false;
+        }
+
+        if (y.getClass() == this.getClass()) {
+            Board that = (Board) y;
+            return Arrays.deepEquals(this.tiles, that.tiles);
+        }
+
+        return false;
     }
 
     // all neighboring boards
@@ -124,21 +136,21 @@ public class Board {
             neighbors.add(neighborBoard(x, y, x, y - 1));
         }
 
-        return new NeighborIerable(neighbors);
+        return neighbors;
     }
 
     private Board neighborBoard(int blankX, int blankY, int x, int y) {
-        int[][] neighborsTiles = copyTiles();
+        int[][] neighborsTiles = copyTiles(this.tiles);
         neighborsTiles[blankY][blankX] = tiles[y][x];
         neighborsTiles[y][x] = this.tiles[blankY][blankX];
         return new Board(neighborsTiles);
     }
 
-    private int[][] copyTiles() {
-        int[][] copyTiles = new int[tiles.length][tiles.length];
-        for (int i = 0; i < tiles.length; i++) {
-            for (int j = 0; j < tiles[i].length; j++) {
-                copyTiles[i][j] = tiles[i][j];
+    private int[][] copyTiles(int[][] from) {
+        int[][] copyTiles = new int[from.length][from.length];
+        for (int i = 0; i < from.length; i++) {
+            for (int j = 0; j < from[i].length; j++) {
+                copyTiles[i][j] = from[i][j];
             }
         }
 
@@ -165,48 +177,11 @@ public class Board {
         return null;
     }
 
-    private class NeighborIerable implements Iterable<Board> {
-
-        ArrayList<Board> neighbors;
-
-        public NeighborIerable(ArrayList<Board> neighbors) {
-            this.neighbors = neighbors;
-        }
-
-        @Override
-        public Iterator<Board> iterator() {
-            return new NeighborIterator();
-        }
-
-        public class NeighborIterator implements Iterator<Board> {
-            int index = 0;
-
-            @Override
-            public boolean hasNext() {
-                if (index < neighbors.size()) {
-                    return true;
-                }
-                return false;
-            }
-
-            @Override
-            public Board next() {
-                if (index < neighbors.size()) {
-                    Board board = neighbors.get(index);
-                    index++;
-                    return board;
-                }
-
-                return null;
-            }
-        }
-    }
-
     // unit testing (not graded)
     public static void main(String[] args) {
         int[][] tiles = {
-                { 0, 1 },
-                { 2, 3 },
+                { 1, 0},
+                { 2, 3},
         };
 
         // int[][] tiles2 = {
@@ -217,7 +192,7 @@ public class Board {
         // };
 
         Board board = new Board(tiles);
-        System.out.println(board.twin().toString());
+        System.out.println(board.manhattan());
         // for (Board bo : board.neighbors()) {
         // System.out.println(bo.toString());
         // }
