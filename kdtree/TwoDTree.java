@@ -60,11 +60,16 @@ class TwoDTree {
 
     public void put(Point2D p) {
         size++;
-        root = put(root, p, false);
+        root = put(root, p, false, null);
     }
 
-    private Node put(Node node, Point2D p, Boolean isX) {
-        if(node == null) return new Node(p, isX);
+    private Node put(Node node, Point2D p, Boolean isX, RectHV rect) {
+        if (node == null) {
+            if (rect == null) {
+                return new Node(p, isX, new RectHV(0, 0, 1, 1));
+            }
+            return new Node(p, isX, rect);
+        }
         int cmp =  0;
 
         if(isX){
@@ -77,8 +82,26 @@ class TwoDTree {
             else cmp = 0;
         }
         
-        if (cmp > 0) node.rt = put(node.rt, p, !isX);
-        if (cmp < 0) node.lb = put(node.lb, p, !isX);
+        if (cmp > 0) {
+            RectHV rtRect;
+            if(isX){
+                rtRect = new RectHV(rect.xmin(), rect.ymin(), node.p.x(), rect.ymax());
+            }else{
+                rtRect = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), node.p.y());
+            }
+            node.rt = put(node.rt, p, !isX, rtRect);
+        }
+
+        if (cmp < 0) {
+            RectHV lbRect;
+             if(isX){
+                lbRect = new RectHV(node.p.x(), rect.ymin(), rect.xmax(), rect.ymax());
+            }else{
+                lbRect = new RectHV(rect.xmin(), node.p.y(), rect.xmax(), rect.ymax());
+            }
+
+            node.lb = put(node.lb, p, !isX, lbRect);
+        }
         else node.p = p;
         node.size = 1 + size(node.rt) + size(node.lb);
         return node;
@@ -92,9 +115,10 @@ class TwoDTree {
         private Boolean isX;
         private int size;
 
-        public Node(Point2D p, Boolean isX) {
+        public Node(Point2D p, Boolean isX, RectHV rect) {
             this.p = p;
             this.isX = isX;
+            this.rect = rect;
         }
     }
 }
