@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.RectHV;
@@ -18,28 +20,34 @@ class TwoDTree {
         Node node = root;
         while (node != null) {
 
-            if (p.equals(p)) return node;
+            if (p.equals(p))
+                return node;
 
-            if(node.isX) {
-                if(node.p.y() > p.y()) node = node.rt;
-                if(node.p.y() < p.y()) node = node.lb;
+            if (node.isX) {
+                if (node.p.y() > p.y())
+                    node = node.rt;
+                if (node.p.y() < p.y())
+                    node = node.lb;
             }
 
-            if(!node.isX) {
-                if(node.p.x() > p.x()) node = node.rt;
-                if(node.p.x() < p.x()) node = node.lb;
+            if (!node.isX) {
+                if (node.p.x() > p.x())
+                    node = node.rt;
+                if (node.p.x() < p.x())
+                    node = node.lb;
             }
         }
 
         return node;
     }
 
-    private int size (Node node) {
-        if (node == null) return 0;
+    private int size(Node node) {
+        if (node == null)
+            return 0;
         return node.size;
     }
 
-    public int size () {
+    public int size() {
         return size(root);
     }
 
@@ -51,7 +59,8 @@ class TwoDTree {
 
     private void inorder(Node node, Queue<Point2D> queue) {
 
-        if(node == null) return;
+        if (node == null)
+            return;
 
         inorder(node.lb, queue);
         queue.enqueue(node.p);
@@ -60,33 +69,50 @@ class TwoDTree {
 
     public void put(Point2D p) {
         size++;
-        root = put(root, p, false, null);
+
+        RectHV rect = null;
+        if (root != null) {
+            rect = root.rect;
+        }
+
+        root = put(root, p, false, rect);
     }
 
     private Node put(Node node, Point2D p, Boolean isX, RectHV rect) {
+        System.out.println(node);
+        System.out.println(rect);
+
         if (node == null) {
             if (rect == null) {
                 return new Node(p, isX, new RectHV(0, 0, 1, 1));
             }
+
             return new Node(p, isX, rect);
         }
-        int cmp =  0;
 
-        if(isX){
-            if(node.p.y() > p.y()) cmp = 1;
-            if(node.p.y() < p.y()) cmp = -1;
-            else cmp = 0;
-        }else{
-            if(node.p.x() > p.x()) cmp = 1;
-            if(node.p.x() < p.x()) cmp = -1;
-            else cmp = 0;
+        int cmp = 0;
+
+        if (isX) {
+            if (node.p.y() > p.y())
+                cmp = 1;
+            if (node.p.y() < p.y())
+                cmp = -1;
+            else
+                cmp = 0;
+        } else {
+            if (node.p.x() > p.x())
+                cmp = 1;
+            if (node.p.x() < p.x())
+                cmp = -1;
+            else
+                cmp = 0;
         }
-        
+
         if (cmp > 0) {
             RectHV rtRect;
-            if(isX){
+            if (isX) {
                 rtRect = new RectHV(rect.xmin(), rect.ymin(), node.p.x(), rect.ymax());
-            }else{
+            } else {
                 rtRect = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), node.p.y());
             }
             node.rt = put(node.rt, p, !isX, rtRect);
@@ -94,23 +120,59 @@ class TwoDTree {
 
         if (cmp < 0) {
             RectHV lbRect;
-             if(isX){
+            if (isX) {
                 lbRect = new RectHV(node.p.x(), rect.ymin(), rect.xmax(), rect.ymax());
-            }else{
+            } else {
                 lbRect = new RectHV(rect.xmin(), node.p.y(), rect.xmax(), rect.ymax());
             }
 
             node.lb = put(node.lb, p, !isX, lbRect);
         }
-        else node.p = p;
+
+        node.p = p;
         node.size = 1 + size(node.rt) + size(node.lb);
         return node;
     }
 
+    public Iterable<Point2D> contains(RectHV rect) {
+        ArrayList<Point2D> points = new ArrayList<Point2D>();
+        contains(root, points, rect);
+        return points;
+    }
+
+    private void contains(Node node, ArrayList<Point2D> points, RectHV rect) {
+        if (rect.intersects(node.rect)) {
+            contains(node.lb, points, rect);
+            contains(node.rt, points, rect);
+        } else {
+            if (inside(node.rt.rect, rect)) {
+                contains(node.rt, points, rect);
+            }
+
+            if (inside(node.lb.rect, rect)) {
+                contains(node.lb, points, rect);
+            }
+        }
+
+        if (rect.contains(node.p)) {
+            points.add(node.p);
+        }
+    }
+
+    private boolean inside(RectHV thisRect, RectHV that) {
+        if (thisRect.xmin() < that.xmax() &&
+                thisRect.ymin() < that.ymax() &&
+                thisRect.xmax() > that.xmax() &&
+                thisRect.ymax() > that.ymax())
+            return true;
+
+        return false;
+    }
+
     private class Node {
-        private Point2D p;      // the point
-        private RectHV rect;    // the axis-aligned rectangle corresponding to this node
-        private Node lb;        
+        private Point2D p; // the point
+        private RectHV rect; // the axis-aligned rectangle corresponding to this node
+        private Node lb;
         private Node rt;
         private Boolean isX;
         private int size;
@@ -122,4 +184,3 @@ class TwoDTree {
         }
     }
 }
-        
