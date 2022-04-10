@@ -1,4 +1,6 @@
 
+import java.util.ArrayList;
+
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 
@@ -51,4 +53,40 @@ public class KdTree {
 
         return tree.contains(rect);
     }
+
+    public Iterable<Point2D> points() {
+        return tree.inorder();
+    }
+
+    // public static void main(String[] args) {
+    // // initialize the data structures from file
+    // String filename = args[0];
+    // In in = new In(filename);
+    // // PointSET brute = new PointSET();
+    // KdTree kdtree = new KdTree();
+    // while (!in.isEmpty()) {
+    // double x = in.readDouble();
+    // double y = in.readDouble();
+    // Point2D p = new Point2D(x, y);
+    // kdtree.insert(p);
+    // // brute.insert(p);
+    // }
+
+    // System.out.println(kdtree.tree.root);
+    // System.out.println(kdtree.size());
+    // System.out.println(kdtree.points());
+    // }
+
+    public static void main(String[] args) {
+        // initialize the data structures from file
+        // PointSET brute = new PointSET();
+        ArrayList<Point2D> points = new ArrayList<Point2D>();
+        KdTree kdtree = new KdTree();
+        for (Point2D point : points) {
+            kdtree.insert(point);
+        }
+        // find the distance between the point and rectange and compare the distance
+        // with the closested distance
+    }
+
 }

@@ -5,7 +5,7 @@ import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.RectHV;
 
 class TwoDTree {
-    private Node root;
+    Node root;
     protected int size;
 
     public Boolean isEmpty() {
@@ -79,57 +79,53 @@ class TwoDTree {
     }
 
     private Node put(Node node, Point2D p, Boolean isX, RectHV rect) {
-        System.out.println(node);
-        System.out.println(rect);
-
         if (node == null) {
             if (rect == null) {
-                return new Node(p, isX, new RectHV(0, 0, 1, 1));
+                return new Node(p, isX, new RectHV(0, 0, 1, 1), 1);
             }
 
-            return new Node(p, isX, rect);
+            return new Node(p, isX, rect, 1);
         }
 
         int cmp = 0;
 
         if (isX) {
-            if (node.p.y() > p.y())
-                cmp = 1;
             if (node.p.y() < p.y())
+                cmp = 1;
+            else if (node.p.y() > p.y())
                 cmp = -1;
             else
                 cmp = 0;
         } else {
-            if (node.p.x() > p.x())
-                cmp = 1;
             if (node.p.x() < p.x())
+                cmp = 1;
+            else if (node.p.x() > p.x())
                 cmp = -1;
             else
                 cmp = 0;
         }
 
-        if (cmp > 0) {
+        if (cmp < 0) {
             RectHV rtRect;
             if (isX) {
-                rtRect = new RectHV(rect.xmin(), rect.ymin(), node.p.x(), rect.ymax());
-            } else {
                 rtRect = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), node.p.y());
+            } else {
+                rtRect = new RectHV(rect.xmin(), rect.ymin(), node.p.x(), rect.ymax());
             }
             node.rt = put(node.rt, p, !isX, rtRect);
         }
 
-        if (cmp < 0) {
+        if (cmp > 0) {
             RectHV lbRect;
             if (isX) {
-                lbRect = new RectHV(node.p.x(), rect.ymin(), rect.xmax(), rect.ymax());
-            } else {
                 lbRect = new RectHV(rect.xmin(), node.p.y(), rect.xmax(), rect.ymax());
+            } else {
+                lbRect = new RectHV(node.p.x(), rect.ymin(), rect.xmax(), rect.ymax());
             }
 
             node.lb = put(node.lb, p, !isX, lbRect);
         }
 
-        node.p = p;
         node.size = 1 + size(node.rt) + size(node.lb);
         return node;
     }
@@ -141,15 +137,19 @@ class TwoDTree {
     }
 
     private void contains(Node node, ArrayList<Point2D> points, RectHV rect) {
+        if (node == null) {
+            return;
+        }
+
         if (rect.intersects(node.rect)) {
             contains(node.lb, points, rect);
             contains(node.rt, points, rect);
         } else {
-            if (inside(node.rt.rect, rect)) {
+            if (node.rt != null && inside(node.rt.rect, rect)) {
                 contains(node.rt, points, rect);
             }
 
-            if (inside(node.lb.rect, rect)) {
+            if (node.lb != null && inside(node.lb.rect, rect)) {
                 contains(node.lb, points, rect);
             }
         }
@@ -157,6 +157,14 @@ class TwoDTree {
         if (rect.contains(node.p)) {
             points.add(node.p);
         }
+    }
+
+    public Point2D nearest(Point2D point) {
+        return null;
+    }
+
+    private void nearest(Node node, Point2D point, Point2D nearest) {
+
     }
 
     private boolean inside(RectHV thisRect, RectHV that) {
@@ -177,10 +185,15 @@ class TwoDTree {
         private Boolean isX;
         private int size;
 
-        public Node(Point2D p, Boolean isX, RectHV rect) {
+        public Node(Point2D p, Boolean isX, RectHV rect, int size) {
             this.p = p;
             this.isX = isX;
             this.rect = rect;
+            this.size = size;
+        }
+
+        public String toString() {
+            return this.p.toString();
         }
     }
 }
