@@ -7,9 +7,10 @@ import edu.princeton.cs.algs4.RectHV;
 public class PointSET {
     private final TreeSet<Point2D> tree;
     
-    public PointSET(){
+    public PointSET() {
         this.tree = new TreeSet<Point2D>();
     }
+
     // is the set empty? 
     public boolean isEmpty() {
         return tree.isEmpty();
@@ -54,10 +55,10 @@ public class PointSET {
         }
 
         ArrayList<Point2D>  points = new ArrayList<Point2D>();
-        for(Point2D point: tree){
+        for (Point2D point: tree) {
            if (rect.contains(point)) {
                points.add(point);
-           };
+           }
         }
 
         return points;
@@ -72,8 +73,8 @@ public class PointSET {
         Point2D nearest = null;
         double distanceToThatPoint = Double.NEGATIVE_INFINITY;
 
-        for(Point2D that: tree){
-            if(distanceToThatPoint == Double.NEGATIVE_INFINITY){
+        for (Point2D that: tree) {
+            if (distanceToThatPoint == Double.NEGATIVE_INFINITY) {
                distanceToThatPoint  = p.distanceTo(that);
                nearest = that;
                continue;
@@ -89,10 +90,6 @@ public class PointSET {
     }
  
     // unit testing of the methods (optional) 
-    public static void main(String[] args) {
-        PointSET pointSet = new PointSET();
-        pointSet.insert(new Point2D(0.2,0.3));
-        pointSet.insert(new Point2D(0.2,0.5));
-        pointSet.insert(new Point2D(0.2,0.6));
-    }
+    // public static void main(String[] args) {
+    // }
 }
