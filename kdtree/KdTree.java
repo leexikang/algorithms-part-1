@@ -58,6 +58,9 @@ public class KdTree {
         return tree.inorder();
     }
 
+    public Point2D nearest(Point2D point) {
+        return tree.nearest(point);
+    }
     // public static void main(String[] args) {
     // // initialize the data structures from file
     // String filename = args[0];
@@ -81,10 +84,15 @@ public class KdTree {
         // initialize the data structures from file
         // PointSET brute = new PointSET();
         ArrayList<Point2D> points = new ArrayList<Point2D>();
+        points.add(new Point2D(0.372, 0.497));
+        points.add(new Point2D(0.564, 0.413));
+        points.add(new Point2D(0.226, 0.577));
         KdTree kdtree = new KdTree();
         for (Point2D point : points) {
             kdtree.insert(point);
         }
+        System.out.println(kdtree.nearest(new Point2D(0.564, 0.413)));
+
         // find the distance between the point and rectange and compare the distance
         // with the closested distance
     }

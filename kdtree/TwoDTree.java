@@ -160,11 +160,34 @@ class TwoDTree {
     }
 
     public Point2D nearest(Point2D point) {
-        return null;
+        return nearest(root, point, null);
     }
 
-    private void nearest(Node node, Point2D point, Point2D nearest) {
+    private Point2D nearest(Node node, Point2D that, Point2D chmp) {
+        if (node == null) {
+            return chmp;
+        }
 
+        if (chmp == null) {
+            chmp = node.p;
+        }
+
+        double chmpDistance = chmp.distanceTo(that);
+
+        if (node.p.distanceTo(that) < chmp.distanceTo(that)) {
+            chmp = node.p;
+            chmpDistance = node.p.distanceSquaredTo(that);
+        }
+
+        if (node.lb != null && node.lb.rect.distanceTo(that) < chmpDistance) {
+            chmp = nearest(node.lb, that, chmp);
+        }
+
+        if (node.rt != null && node.lb.rect.distanceTo(that) < chmpDistance) {
+            chmp = nearest(node.rt, that, chmp);
+        }
+
+        return chmp;
     }
 
     private boolean inside(RectHV thisRect, RectHV that) {
