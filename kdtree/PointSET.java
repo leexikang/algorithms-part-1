@@ -1,22 +1,23 @@
 import java.util.ArrayList;
 import java.util.TreeSet;
 
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.RectHV;
 
 public class PointSET {
     private final TreeSet<Point2D> tree;
-    
+
     public PointSET() {
         this.tree = new TreeSet<Point2D>();
     }
 
-    // is the set empty? 
+    // is the set empty?
     public boolean isEmpty() {
         return tree.isEmpty();
     }
 
-    // number of points in the set 
+    // number of points in the set
     public int size() {
         return tree.size();
     }
@@ -30,8 +31,8 @@ public class PointSET {
         tree.add(p);
     }
 
-    // does the set contain point p? 
-    public  boolean contains(Point2D p) {
+    // does the set contain point p?
+    public boolean contains(Point2D p) {
         if (p == null) {
             throw new IllegalArgumentException();
         }
@@ -39,32 +40,32 @@ public class PointSET {
         return tree.contains(p);
     }
 
-    // draw all points to standard draw 
+    // draw all points to standard draw
     public void draw() {
-        
-        for (Point2D point: tree) {
+
+        for (Point2D point : tree) {
             point.draw();
         }
-    } 
+    }
 
-    // all points that are inside the rectangle (or on the boundary) 
+    // all points that are inside the rectangle (or on the boundary)
     public Iterable<Point2D> range(RectHV rect) {
-        
+
         if (rect == null) {
             throw new IllegalArgumentException();
         }
 
-        ArrayList<Point2D>  points = new ArrayList<Point2D>();
-        for (Point2D point: tree) {
-           if (rect.contains(point)) {
-               points.add(point);
-           }
+        ArrayList<Point2D> points = new ArrayList<Point2D>();
+        for (Point2D point : tree) {
+            if (rect.contains(point)) {
+                points.add(point);
+            }
         }
 
         return points;
     }
 
-    // a nearest neighbor in the set to point p; null if the set is empty 
+    // a nearest neighbor in the set to point p; null if the set is empty
     public Point2D nearest(Point2D p) {
         if (p == null) {
             throw new IllegalArgumentException();
@@ -73,23 +74,38 @@ public class PointSET {
         Point2D nearest = null;
         double distanceToThatPoint = Double.NEGATIVE_INFINITY;
 
-        for (Point2D that: tree) {
+        for (Point2D that : tree) {
             if (distanceToThatPoint == Double.NEGATIVE_INFINITY) {
-               distanceToThatPoint  = p.distanceTo(that);
-               nearest = that;
-               continue;
-            } 
+                distanceToThatPoint = p.distanceSquaredTo(that);
+                nearest = that;
+                continue;
+            }
 
-           if (p.distanceSquaredTo(that) < distanceToThatPoint) {
-               distanceToThatPoint =  p.distanceSquaredTo(that);
-               nearest = that;
-           }
+            if (p.distanceSquaredTo(that) < distanceToThatPoint) {
+                distanceToThatPoint = p.distanceSquaredTo(that);
+                nearest = that;
+            }
         }
 
         return nearest;
     }
- 
-    // unit testing of the methods (optional) 
+
+    // unit testing of the methods (optional)
     // public static void main(String[] args) {
     // }
+    public static void main(String[] args) {
+        // initialize the data structures from file
+        String filename = args[0];
+        In in = new In(filename);
+        PointSET brute = new PointSET();
+        while (!in.isEmpty()) {
+            double x = in.readDouble();
+            double y = in.readDouble();
+            Point2D p = new Point2D(x, y);
+            brute.insert(p);
+        }
+
+        System.out.println(brute.nearest(new Point2D(0.75, 0.0)));
+    }
+
 }

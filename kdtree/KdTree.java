@@ -1,6 +1,7 @@
 
 import java.util.ArrayList;
 
+import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.Point2D;
 import edu.princeton.cs.algs4.Queue;
 import edu.princeton.cs.algs4.RectHV;
@@ -74,9 +75,7 @@ public class KdTree {
                 rtRect = new RectHV(rect.xmin(), rect.ymin(), node.p.x(), rect.ymax());
             }
             node.rt = put(node.rt, p, !isX, rtRect);
-        }
-
-        if (cmp > 0) {
+        } else if (cmp > 0) {
             RectHV lbRect;
             if (isX) {
                 lbRect = new RectHV(rect.xmin(), node.p.y(), rect.xmax(), rect.ymax());
@@ -85,12 +84,21 @@ public class KdTree {
             }
 
             node.lb = put(node.lb, p, !isX, lbRect);
+        } else {
+            RectHV rtRect;
+            if (isX) {
+                rtRect = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), node.p.y());
+            } else {
+                rtRect = new RectHV(rect.xmin(), rect.ymin(), node.p.x(), rect.ymax());
+            }
+            node.rt = put(node.rt, p, !isX, rtRect);
         }
 
         node.size = 1 + size(node.rt) + size(node.lb);
         return node;
     }
-        // does the set contain point p?
+
+    // does the set contain point p?
     public boolean contains(Point2D p) {
         if (p == null) {
             throw new IllegalArgumentException();
@@ -138,8 +146,6 @@ public class KdTree {
         return false;
     }
 
-
-
     private Node search(Point2D p) {
         Node node = root;
         while (node != null) {
@@ -165,8 +171,6 @@ public class KdTree {
         return node;
     }
 
-
-
     // draw all points to standard draw
     public void draw() {
         for (Point2D point : inorder()) {
@@ -189,7 +193,6 @@ public class KdTree {
         queue.enqueue(node.p);
         inorder(node.rt, queue);
     }
-
 
     public Iterable<Point2D> range(RectHV rect) {
 
@@ -214,14 +217,14 @@ public class KdTree {
         }
 
         double chmpDistance = chmp.distanceSquaredTo(that);
-        
+
         if (node.p.distanceSquaredTo(that) < chmp.distanceSquaredTo(that)) {
             chmp = node.p;
             chmpDistance = node.p.distanceSquaredTo(that);
         }
 
         if (node.lb != null && node.lb.rect.distanceSquaredTo(that) < chmpDistance) {
-                        chmp = nearest(node.lb, that, chmp);
+            chmp = nearest(node.lb, that, chmp);
         }
 
         if (node.rt != null && node.rt.rect.distanceSquaredTo(that) < chmpDistance) {
@@ -251,41 +254,39 @@ public class KdTree {
         }
     }
 
-    // public static void main(String[] args) {
-    // // initialize the data structures from file
-    // String filename = args[0];
-    // In in = new In(filename);
-    // // PointSET brute = new PointSET();
-    // KdTree kdtree = new KdTree();
-    // while (!in.isEmpty()) {
-    // double x = in.readDouble();
-    // double y = in.readDouble();
-    // Point2D p = new Point2D(x, y);
-    // kdtree.insert(p);
-    // // brute.insert(p);
-    // }
-
-    // System.out.println(kdtree.tree.root);
-    // System.out.println(kdtree.size());
-    // System.out.println(kdtree.points());
-    // }
-
     public static void main(String[] args) {
         // initialize the data structures from file
+        String filename = args[0];
+        In in = new In(filename);
         // PointSET brute = new PointSET();
-        ArrayList<Point2D> points = new ArrayList<Point2D>();
-        points.add(new Point2D(0.372, 0.497));
-        points.add(new Point2D(0.564, 0.413));
-        points.add(new Point2D(0.226, 0.577));
-        // points.add(new Point2D(0.144, 0.179));
         KdTree kdtree = new KdTree();
-        for (Point2D point : points) {
-            kdtree.insert(point);
+        while (!in.isEmpty()) {
+            double x = in.readDouble();
+            double y = in.readDouble();
+            Point2D p = new Point2D(x, y);
+            kdtree.insert(p);
+            // brute.insert(p);
         }
-        System.out.println(kdtree.nearest(new Point2D(0.504, 0.413)));
 
-        // find the distance between the point and rectange and compare the distance
-        // with the closested distance
+        System.out.println(kdtree.size());
     }
+
+    // public static void main(String[] args) {
+    // // initialize the data structures from file
+    // // PointSET brute = new PointSET();
+    // ArrayList<Point2D> points = new ArrayList<Point2D>();
+    // points.add(new Point2D(0.372, 0.497));
+    // points.add(new Point2D(0.564, 0.413));
+    // points.add(new Point2D(0.226, 0.577));
+    // // points.add(new Point2D(0.144, 0.179));
+    // KdTree kdtree = new KdTree();
+    // for (Point2D point : points) {
+    // kdtree.insert(point);
+    // }
+    // System.out.println(kdtree.nearest(new Point2D(0.504, 0.413)));
+
+    // // find the distance between the point and rectange and compare the distance
+    // // with the closested distance
+    // }
 
 }
