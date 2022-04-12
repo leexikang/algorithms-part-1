@@ -52,25 +52,26 @@ public class KdTree {
         int cmp = 0;
 
         if (isX) {
-            cmp = Point2D.Y_ORDER.compare(node.p, p);
+            cmp = Point2D.Y_ORDER.compare(p, node.p);
         } else {
-            cmp = Point2D.X_ORDER.compare(node.p, p);
+            cmp = Point2D.X_ORDER.compare(p, node.p);
         }
 
         if (cmp > 0) {
             RectHV rtRect;
             if (isX) {
-                rtRect = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), node.p.y());
+                rtRect = new RectHV(rect.xmin(), node.p.y(), rect.xmax(), rect.ymax());
             } else {
-                rtRect = new RectHV(rect.xmin(), rect.ymin(), node.p.x(), rect.ymax());
+                rtRect = new RectHV(node.p.x(), rect.ymin(), rect.xmax(), rect.ymax());
             }
             node.rt = put(node.rt, p, !isX, rtRect);
         } else if (cmp < 0) {
             RectHV lbRect;
+
             if (isX) {
-                lbRect = new RectHV(rect.xmin(), node.p.y(), rect.xmax(), rect.ymax());
+                lbRect = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), node.p.y());
             } else {
-                lbRect = new RectHV(node.p.x(), rect.ymin(), rect.xmax(), rect.ymax());
+                lbRect = new RectHV(rect.xmin(), rect.ymin(), node.p.x(), rect.ymax());
             }
 
             node.lb = put(node.lb, p, !isX, lbRect);
@@ -99,65 +100,55 @@ public class KdTree {
 
         Node node = root;
         while (node != null) {
-            
-            
-            int cmp =  Point2D.R_ORDER.compare(node.p, p);
-            if (cmp > 0) node = node.rt;
-            else if (cmp < 0) node = node.lb;
-            else return true;
-            
+
+            int cmp = Point2D.R_ORDER.compare(node.p, p);
+            if (cmp > 0)
+                node = node.rt;
+            else if (cmp < 0)
+                node = node.lb;
+            else
+                return true;
+
             // int cmp = -11;
             // if (node.isX) {
-            //     cmp = Point2D.Y_ORDER.compare(node.p, p);
+            // cmp = Point2D.Y_ORDER.compare(node.p, p);
             // }else{
-            //     cmp = Point2D.X_ORDER.compare(node.p, p);
+            // cmp = Point2D.X_ORDER.compare(node.p, p);
             // }
 
             // System.out.println(cmp);
             // if (cmp > 0) node = node.rt;
             // else if (cmp < 0) node = node.lb;
             // else {
-            //     System.out.println("---------");
-            //     if (node.isX) {
-            //         if(Point2D.X_ORDER.compare(node.p, p) == 0){
-            //             return true;
-            //         }else {
-            //             node.rt = node.rt;
-            //         }
-            //     } else {
-            //         if(Point2D.Y_ORDER.compare(node.p, p) == 0){
-            //             return true;
-            //         }else {
-            //             node.rt = node.rt;
-            //         }
-            //     }
+            // System.out.println("---------");
+            // if (node.isX) {
+            // if(Point2D.X_ORDER.compare(node.p, p) == 0){
+            // return true;
+            // }else {
+            // node.rt = node.rt;
+            // }
+            // } else {
+            // if(Point2D.Y_ORDER.compare(node.p, p) == 0){
+            // return true;
+            // }else {
+            // node.rt = node.rt;
+            // }
+            // }
             // }
         }
         return false;
-    }
-
-    private Iterable<Point2D> contains(RectHV rect) {
-        ArrayList<Point2D> points = new ArrayList<Point2D>();
-        contains(root, points, rect);
-        return points;
     }
 
     private void contains(Node node, ArrayList<Point2D> points, RectHV rect) {
         if (node == null) {
             return;
         }
-
-        if (rect.intersects(node.rect)) {
+        if (node.lb != null && node.lb.rect.intersects(rect)) {
             contains(node.lb, points, rect);
-            contains(node.rt, points, rect);
-        } else {
-            if (node.rt != null && inside(node.rt.rect, rect)) {
-                contains(node.rt, points, rect);
-            }
+        }
 
-            if (node.lb != null && inside(node.lb.rect, rect)) {
-                contains(node.lb, points, rect);
-            }
+        if (node.rt != null && node.rt.rect.intersects(rect)) {
+            contains(node.rt, points, rect);
         }
 
         if (rect.contains(node.p)) {
@@ -165,15 +156,15 @@ public class KdTree {
         }
     }
 
-    private boolean inside(RectHV thisRect, RectHV that) {
-        if (thisRect.xmin() < that.xmax() &&
-                thisRect.ymin() < that.ymax() &&
-                thisRect.xmax() > that.xmax() &&
-                thisRect.ymax() > that.ymax())
-            return true;
+    // private boolean inside(RectHV thisRect, RectHV that) {
+    // if (thisRect.xmin() <= that.xmax() &&
+    // thisRect.ymin() <= that.ymax() &&
+    // thisRect.xmax() >= that.xmax() &&
+    // thisRect.ymax() >= that.ymax())
+    // return true;
 
-        return false;
-    }
+    // return false;
+    // }
 
     // draw all points to standard draw
     public void draw() {
@@ -182,20 +173,20 @@ public class KdTree {
         }
     }
 
-    private Iterable<Node> inorderNode() {
-        Queue<Node> queue = new Queue<Node>();
-        inorderNode(root, queue);
-        return queue;
-    }
+    // private Iterable<Node> inorderNode() {
+    // Queue<Node> queue = new Queue<Node>();
+    // inorderNode(root, queue);
+    // return queue;
+    // }
 
-    private void inorderNode(Node node, Queue<Node> queue) {
-        if (node == null)
-            return;
+    // private void inorderNode(Node node, Queue<Node> queue) {
+    // if (node == null)
+    // return;
 
-        inorderNode(node.lb, queue);
-        queue.enqueue(node);
-        inorderNode(node.rt, queue);
-    }
+    // inorderNode(node.lb, queue);
+    // queue.enqueue(node);
+    // inorderNode(node.rt, queue);
+    // }
 
     private Iterable<Point2D> inorder() {
         Queue<Point2D> queue = new Queue<Point2D>();
@@ -219,7 +210,9 @@ public class KdTree {
             throw new IllegalArgumentException();
         }
 
-        return contains(rect);
+        ArrayList<Point2D> points = new ArrayList<Point2D>();
+        contains(root, points, rect);
+        return points;
     }
 
     public Point2D nearest(Point2D point) {
@@ -279,21 +272,21 @@ public class KdTree {
         In in = new In(filename);
         // PointSET brute = new PointSET();
         KdTree kdtree = new KdTree();
-        kdtree.insert( new Point2D(0.5, 0.5));
-        kdtree.insert( new Point2D(0.25, 0.5));
-        kdtree.insert( new Point2D(0.0, 0.375));
-        kdtree.insert( new Point2D(0.625, 0.25));
-        kdtree.insert( new Point2D(1.0, 1.0));
-        kdtree.insert( new Point2D(0.5, 0.0));
+        // kdtree.insert(new Point2D(0.372, 0.497));
+        // kdtree.insert(new Point2D(0.564, 0.413));
+        // kdtree.insert(new Point2D(0.226, 0.577));
+        // kdtree.insert(new Point2D(0.625, 0.25));
+        // kdtree.insert(new Point2D(1.0, 1.0));
+        // kdtree.insert(new Point2D(0.5, 0.0));
 
-        // while (!in.isEmpty()) {
-        //     double x = in.readDouble();
-        //     double y = in.readDouble();
-        //     kdtree.contains(new Point2D(x, y));
-        // }
-        System.out.println(kdtree.contains(new Point2D(0.5, 0.5)));
-        System.out.println(kdtree.contains(new Point2D(1.0, 1.0)));
-        System.out.println(kdtree.contains(new Point2D(0.0, 0.448)));
+        while (!in.isEmpty()) {
+            double x = in.readDouble();
+            double y = in.readDouble();
+            kdtree.insert(new Point2D(x, y));
+        }
+
+        System.out.println(kdtree.range(new RectHV(0.13, 0.24, 0.32, 0.68)));
+        System.out.println(kdtree.inorder());
         // System.out.println(kdtree.size());
     }
 }
