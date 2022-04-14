@@ -128,7 +128,7 @@ public class KdTree {
         // point2.draw();
         // point3.draw();
         System.out.println(kdtree.inorderNode());
-        System.out.println(kdtree.contains(new Point2D(0.5, 0.75)));
+        System.out.println(kdtree.nearest(new Point2D(0.76, 0.39)));
     }
 
     private Node put(Node node, Point2D p, boolean isX, RectHV rect) {
@@ -149,12 +149,12 @@ public class KdTree {
         }
 
         if (cmp > 0) {
-            node.rt = put(node.rt, p, !isX, node.rightRec());
+            node.rt = put(node.rt, p, !isX, node.rightRec);
         } else if (cmp < 0) {
-            node.lb = put(node.lb, p, !isX, node.leftRec());
+            node.lb = put(node.lb, p, !isX, node.leftRec);
         } else {
             if (!node.p.equals(p)) {
-                node.rt = put(node.rt, p, !isX, node.rightRec());
+                node.rt = put(node.rt, p, !isX, node.rightRec);
             }
         }
 
@@ -229,13 +229,12 @@ public class KdTree {
         if (chmp == null) {
             chmp = node.p;
         }
-
         if (that.distanceSquaredTo(node.p) < that.distanceSquaredTo(chmp)) {
             chmp = node.p;
         }
 
         if (node.rt != null && node.lb != null) {
-            if (that.distanceSquaredTo(node.rt.p) < that.distanceSquaredTo(node.lb.p)) {
+            if (shouldGoRight(node, that)) {
                 if (node.rt.rect.distanceSquaredTo(that) < that.distanceSquaredTo(chmp)) {
                     chmp = nearest(node.rt, that, chmp);
                 }
@@ -265,6 +264,14 @@ public class KdTree {
         return chmp;
     }
 
+    private boolean shouldGoRight(Node node, Point2D p) {
+        if(node.isX){
+            return p.y() > node.y;
+        }else{
+            return p.x() > node.x;
+        }
+    }
+
     private class Node {
         private Point2D p; // the point
         final private RectHV rect; // the axis-aligned rectangle corresponding to this node
@@ -274,6 +281,8 @@ public class KdTree {
         private int size;
         final private double x;
         final private double y;
+        final private RectHV rightRec;
+        final private RectHV leftRec;
 
         public Node(Point2D p, boolean isX, RectHV rect, int size) {
             this.p = p;
@@ -282,26 +291,17 @@ public class KdTree {
             this.size = size;
             this.x = p.x();
             this.y = p.y();
+            if (isX) {
+                rightRec = new RectHV(rect.xmin(), p.y(), rect.xmax(), rect.ymax());
+                leftRec  = new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), p.y());
+            } else {
+                rightRec = new RectHV(p.x(), rect.ymin(), rect.xmax(), rect.ymax());
+                leftRec = new RectHV(rect.xmin(), rect.ymin(), p.x(), rect.ymax());
+            }
         }
 
         public String toString() {
             return this.p.toString();
-        }
-
-        public RectHV leftRec() {
-            if (isX) {
-                return new RectHV(rect.xmin(), rect.ymin(), rect.xmax(), p.y());
-            } else {
-                return new RectHV(rect.xmin(), rect.ymin(), p.x(), rect.ymax());
-            }
-        }
-
-        public RectHV rightRec() {
-            if (isX) {
-                return new RectHV(rect.xmin(), p.y(), rect.xmax(), rect.ymax());
-            } else {
-                return new RectHV(p.x(), rect.ymin(), rect.xmax(), rect.ymax());
-            }
         }
 
         public void draw() {
