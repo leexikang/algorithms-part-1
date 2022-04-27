@@ -11,22 +11,22 @@ public class BruteCollinearPoints {
     private Point[] p;
 
     public BruteCollinearPoints(Point[] points) {
-        numOfSegment = 0;
-        foundSegments = new LineSegment[0];
-        if (points == null) {
+                if (points == null) {
             throw new IllegalArgumentException();
         }
 
         if (points.length < 4) {
             return;
         }
-        p = points.clone();
+        p = copy(points);
         Arrays.sort(p);
+        checkDuplication(p);
+
+        numOfSegment = 0;
+        foundSegments = new LineSegment[0];
+
 
         for (int i = 0; i < p.length - 3; i++) {
-            if (points[i] == null) {
-                throw new IllegalArgumentException();
-            }
             for (int j = i + 1; j < p.length - 2; j++) {
                 for (int k = j + 1; k < p.length - 1; k++) {
                     for (int l = k + 1; l < p.length; l++) {
@@ -51,12 +51,28 @@ public class BruteCollinearPoints {
                 }
             }
         }
-        if (numOfSegment > 0) {
-            LineSegment[] copy = new LineSegment[numOfSegment];
-            for (int i = 0; i < numOfSegment; i++) {
-                copy[i] = foundSegments[i];
+    }
+
+    private Point[] copy (Point[] original) {
+        Point[] copy = new Point[original.length];
+        for (int i = 0; i < original.length; i++){
+
+            if (original[i] == null) {
+                throw new IllegalArgumentException();
             }
-            foundSegments = copy;
+
+            copy[i] = original[i];
+        }
+        return copy;
+    }
+
+    private void checkDuplication(Point[] p) {
+        Point pre = null;
+        for (int i = 0; i < p.length; i++) {
+            if (pre != null && pre.compareTo(p[i]) == 0) {
+                throw new IllegalArgumentException();
+            }
+            pre = p[i];
         }
     }
 
@@ -78,11 +94,15 @@ public class BruteCollinearPoints {
     }
 
     public LineSegment[] segments() {
-        return foundSegments.clone();
+        if (numOfSegment > 0) {
+            return Arrays.copyOfRange(foundSegments, 0, numOfSegment);
+        }
+
+        return new LineSegment[0];
     }
+    
 
     public static void main(String[] args) {
-
         // read the n points from a file
         In in = new In(args[0]);
         int n = in.readInt();
@@ -101,18 +121,13 @@ public class BruteCollinearPoints {
             p.draw();
         }
         StdDraw.show();
-        Point[] cp = new Point[n + 1];
-        for (int i = 0; i < points.length; i++) {
-            cp[i] = points[i];
-        }
-        cp[n] = points[n - 1];
-        // print and draw the line segmentsA
-        BruteCollinearPoints collinear = new BruteCollinearPoints(cp);
+
+        // print and draw the line segments
+        BruteCollinearPoints collinear = new BruteCollinearPoints(points);
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
             segment.draw();
         }
-
         StdDraw.show();
     }
 }
