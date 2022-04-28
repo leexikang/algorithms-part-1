@@ -11,29 +11,28 @@ public class BruteCollinearPoints {
     private Point[] p;
 
     public BruteCollinearPoints(Point[] points) {
-                if (points == null) {
+        if (points == null) {
             throw new IllegalArgumentException();
         }
 
         if (points.length < 4) {
             return;
         }
-        p = copy(points);
-        Arrays.sort(p);
+        p = copy(points.clone());
+        try {
+            Arrays.sort(p);
+        } catch (Exception e) {
+            throw new IllegalArgumentException();
+        }
         checkDuplication(p);
 
         numOfSegment = 0;
         foundSegments = new LineSegment[0];
 
-
         for (int i = 0; i < p.length - 3; i++) {
             for (int j = i + 1; j < p.length - 2; j++) {
                 for (int k = j + 1; k < p.length - 1; k++) {
                     for (int l = k + 1; l < p.length; l++) {
-                        if (i != 0 && p[i - 1] == p[i]) {
-                            throw new IllegalArgumentException();
-                        }
-
                         Point[] segmentsPoints = new Point[] { p[i], p[j], p[k], p[l], };
                         if (p[i].slopeTo(p[j]) == p[i].slopeTo(p[k])
                                 && p[i].slopeTo(p[j]) == p[i].slopeTo(p[l])) {
@@ -53,9 +52,9 @@ public class BruteCollinearPoints {
         }
     }
 
-    private Point[] copy (Point[] original) {
+    private Point[] copy(Point[] original) {
         Point[] copy = new Point[original.length];
-        for (int i = 0; i < original.length; i++){
+        for (int i = 0; i < original.length; i++) {
 
             if (original[i] == null) {
                 throw new IllegalArgumentException();
@@ -64,16 +63,6 @@ public class BruteCollinearPoints {
             copy[i] = original[i];
         }
         return copy;
-    }
-
-    private void checkDuplication(Point[] p) {
-        Point pre = null;
-        for (int i = 0; i < p.length; i++) {
-            if (pre != null && pre.compareTo(p[i]) == 0) {
-                throw new IllegalArgumentException();
-            }
-            pre = p[i];
-        }
     }
 
     private void resize(int n) {
@@ -100,7 +89,20 @@ public class BruteCollinearPoints {
 
         return new LineSegment[0];
     }
-    
+
+    private void checkDuplication(Point[] p) {
+        Point pre = null;
+        for (int i = 0; i < p.length; i++) {
+            if (p[i] == null) {
+                throw new IllegalArgumentException();
+            }
+
+            if (pre != null && pre.compareTo(p[i]) == 0) {
+                throw new IllegalArgumentException();
+            }
+            pre = p[i];
+        }
+    }
 
     public static void main(String[] args) {
         // read the n points from a file
